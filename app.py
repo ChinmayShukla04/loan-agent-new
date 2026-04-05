@@ -42,7 +42,12 @@ def extract_name(text):
 # =========================
 
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [
+        {
+            "role": "assistant",
+            "content": "Hello! I am your AI Loan Assistant.\n\nHow can I help you today?"
+        }
+    ]
 
 if "user_data" not in st.session_state:
     st.session_state.user_data = {}
@@ -123,18 +128,21 @@ if user_input:
     # 🤖 AI RESPONSE
     # =========================
 
-    response = client.chat.completions.create(
-        model="meta-llama/llama-3-8b-instruct",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            *st.session_state.messages
-        ]
-    )
+    with st.chat_message("assistant"):
+        with st.spinner("Processing your loan request..."):
+            response = client.chat.completions.create(
+                model="meta-llama/llama-3-8b-instruct",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    *st.session_state.messages
+                ]
+            )
 
-    bot_reply = response.choices[0].message.content
+            bot_reply = response.choices[0].message.content
+            st.write(bot_reply)
 
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-    st.chat_message("assistant").write(bot_reply)
+    # st.chat_message("assistant").write(bot_reply)
 
     # =========================
     # ⚙️ LOAN PROCESSING LOGIC
